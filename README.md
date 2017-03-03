@@ -1,3 +1,3 @@
-# rt-horror-scraper
+# horror-movie-scraper
 
-A web scraper for reading horror movie reviews from rotten tomatoes. 
+A web scraper for reading horror movie information from various websites.
