@@ -18,6 +18,20 @@ def get_cell_value(table_cell):
         return inner_html(table_cell)
 
 
+def read_country_flags(movie_row):
+    if len(movie_row.select('td')) < 3:
+        return ''
+    else:
+        country_names = ''
+        flag_table_cell = movie_row.select('td')[2]
+        flag_images = flag_table_cell.select('img')
+        for image in flag_images[:-1]:
+            country_names += image['alt'] + ' & '
+        if len(flag_images) > 0:
+            country_names += flag_images[-1]['alt']
+        return country_names
+
+
 def read_wiki_list_table(url, csv_writer):
     year = url[-4:]
     print('collecting films from ' + year)
@@ -31,16 +45,18 @@ def read_wiki_list_table(url, csv_writer):
             director = get_cell_value(movie_row.select('th')[1]) \
                 if len(movie_row.select('td')) < 1 \
                 else get_cell_value(movie_row.select('td')[0])
+            country = read_country_flags(movie_row)
             csv_row_contents = {
                 'title': title,
                 'director': director,
                 'year': year,
+                'country': country,
             }
             csv_writer.writerow(csv_row_contents)
 
 
 with open('movies.csv', 'w+') as csvfile:
-    fieldnames = ['title', 'director', 'year']
+    fieldnames = ['title', 'director', 'year', 'country']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
 
