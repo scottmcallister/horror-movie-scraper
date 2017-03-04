@@ -1,5 +1,6 @@
 import urllib.request
 import csv
+import re
 from bs4 import BeautifulSoup
 
 list_of_horror_films = 'https://en.wikipedia.org/wiki/Lists_of_horror_films'
@@ -32,6 +33,18 @@ def read_country_flags(movie_row):
         return country_names
 
 
+def name_to_rt_url(name):
+    converted_name = re.sub(r'([^\s\w]|_)+', '', name) \
+        .replace(' ', '_').lower()
+    url = 'https://rottentomatoes.com/m/' + converted_name
+    return url
+
+
+def name_with_year_to_rt_url(name, year):
+    url = name_to_rt_url(name)
+    return url + '_' + str(year)
+
+
 def read_wiki_list_table(url, csv_writer):
     year = url[-4:]
     print('collecting films from ' + year)
@@ -55,18 +68,21 @@ def read_wiki_list_table(url, csv_writer):
             csv_writer.writerow(csv_row_contents)
 
 
-with open('movies.csv', 'w+') as csvfile:
-    fieldnames = ['title', 'director', 'year', 'country']
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    writer.writeheader()
+print(name_to_rt_url("Don't Breathe"))
+print(name_with_year_to_rt_url("Don't Breathe", 2016))
 
-    with urllib.request.urlopen(list_of_horror_films) as response:
-        html = response.read()
-        soup = BeautifulSoup(html, "html.parser")
-        ul_tags = soup.find_all('ul')[1:7]
-
-        for ul_tag in ul_tags:
-            a_tags = ul_tag.find_all('a')
-            for a_tag in a_tags:
-                list_page = 'https://en.wikipedia.org' + a_tag['href']
-                read_wiki_list_table(list_page, writer)
+# with open('movies.csv', 'w+') as csvfile:
+#     fieldnames = ['title', 'director', 'year', 'country']
+#     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#     writer.writeheader()
+#
+#     with urllib.request.urlopen(list_of_horror_films) as response:
+#         html = response.read()
+#         soup = BeautifulSoup(html, "html.parser")
+#         ul_tags = soup.find_all('ul')[1:7]
+#
+#         for ul_tag in ul_tags:
+#             a_tags = ul_tag.find_all('a')
+#             for a_tag in a_tags:
+#                 list_page = 'https://en.wikipedia.org' + a_tag['href']
+#                 read_wiki_list_table(list_page, writer)
