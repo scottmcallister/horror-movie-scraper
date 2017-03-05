@@ -68,8 +68,20 @@ def read_wiki_list_table(url, csv_writer):
             csv_writer.writerow(csv_row_contents)
 
 
-print(name_to_rt_url("Don't Breathe"))
-print(name_with_year_to_rt_url("Don't Breathe", 2016))
+def read_rt_content(rt_url, year):
+    # check if movie is from the right year
+    with urllib.request.urlopen(rt_url) as rt_response:
+        rt_html = rt_response.read()
+        rt_soup = BeautifulSoup(rt_html, "html.parser")
+        year_string = str(rt_soup.select('span.year')[0]) \
+            if len(rt_soup.select('span.year')) > 0 \
+            else ''
+        rt_year = year_string[year_string.find("(") + 1:year_string.find(")")]
+        print(rt_year)
+
+
+read_rt_content('https://www.rottentomatoes.com/m/dont_breathe_2016', 2016)
+
 
 # with open('movies.csv', 'w+') as csvfile:
 #     fieldnames = ['title', 'director', 'year', 'country']
