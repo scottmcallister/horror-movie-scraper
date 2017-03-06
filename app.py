@@ -68,19 +68,43 @@ def read_wiki_list_table(url, csv_writer):
             csv_writer.writerow(csv_row_contents)
 
 
-def read_rt_content(rt_url, year):
-    # check if movie is from the right year
+def read_rt_year_suffix(rt_url):
     with urllib.request.urlopen(rt_url) as rt_response:
         rt_html = rt_response.read()
         rt_soup = BeautifulSoup(rt_html, "html.parser")
+        critic_score = rt_soup.select('.critic-score .meter-value span')
+        user_score = rt_soup.select('.audience-score .meter-value span')
+        response = {
+            'critic_score': inner_html(critic_score[0]),
+            'user_score': inner_html(user_score[0]),
+        }
+        return response
+
+
+def read_rt_content(rt_url, year):
+    with urllib.request.urlopen(rt_url) as rt_response:
+        rt_html = rt_response.read()
+        rt_soup = BeautifulSoup(rt_html, "html.parser")
+        # check if movie is from the right year
         year_string = str(rt_soup.select('span.year')[0]) \
             if len(rt_soup.select('span.year')) > 0 \
             else ''
         rt_year = year_string[year_string.find("(") + 1:year_string.find(")")]
-        print(rt_year)
+        if str(rt_year) != str(year):
+            return read_rt_year_suffix(rt_url + '_' + str(year))
+        else:
+            critic_score = rt_soup.select('.critic-score .meter-value span')
+            user_score = rt_soup.select('.audience-score .meter-value span')
+            response = {
+                'critic_score': inner_html(critic_score[0]),
+                'user_score': inner_html(user_score[0]),
+            }
+            return response
 
 
-read_rt_content('https://www.rottentomatoes.com/m/dont_breathe_2016', 2016)
+print(
+    read_rt_content('https://www.rottentomatoes.com/m/dont_breathe', 2016)
+)
 
 
 # with open('movies.csv', 'w+') as csvfile:
