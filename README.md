@@ -30,7 +30,7 @@ available reviews should take quite a while.
 
 ## Testing
 
-Run `test.py` to execute all unit tests
+Use `test.py` to run all unit tests
 
 ```
 (env) $ python test.py
