@@ -148,25 +148,30 @@ def read_rt_content(rt_url, title, year):
             }
 
 
-with open('movies.csv', 'w+') as csvfile:
-    fieldnames = [
-        'title',
-        'director',
-        'year',
-        'country',
-        'critic_score',
-        'user_score'
-    ]
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    writer.writeheader()
+def main():
+    with open('movies.csv', 'w+') as csvfile:
+        fieldnames = [
+            'title',
+            'director',
+            'year',
+            'country',
+            'critic_score',
+            'user_score'
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
 
-    with urllib.request.urlopen(list_of_horror_films) as response:
-        html = response.read()
-        soup = BeautifulSoup(html, "html.parser")
-        ul_tags = soup.find_all('ul')[1:7]
+        with urllib.request.urlopen(list_of_horror_films) as response:
+            html = response.read()
+            soup = BeautifulSoup(html, "html.parser")
+            ul_tags = soup.find_all('ul')[1:7]
 
-        for ul_tag in ul_tags:
-            a_tags = ul_tag.find_all('a')
-            for a_tag in a_tags:
-                list_page = 'https://en.wikipedia.org' + a_tag['href']
-                read_wiki_list_table(list_page, writer)
+            for ul_tag in ul_tags:
+                a_tags = ul_tag.find_all('a')
+                for a_tag in a_tags:
+                    list_page = 'https://en.wikipedia.org' + a_tag['href']
+                    read_wiki_list_table(list_page, writer)
+
+
+if __name__ == "__main__":
+    main()
