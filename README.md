@@ -30,7 +30,11 @@ available reviews should take quite a while.
 
 ## Testing
 
-TODO: add unit tests
+Run `test.py` to execute all unit tests
+
+```
+(env) $ python test.py
+```
 
 
 ## Built With
