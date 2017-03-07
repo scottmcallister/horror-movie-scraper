@@ -2,7 +2,7 @@
 
 A web scraper for reading horror movie information from various websites.
 
-### Installation
+## Installation
 
 After cloning and changing into the project directory, you'll need to create a
 virtual environment that uses Python 3.
