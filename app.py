@@ -97,6 +97,8 @@ def read_wiki_list_table(url, csv_writer):
                 'country': country,
                 'critic_score': rt_content['critic_score'],
                 'user_score': rt_content['user_score'],
+                'poster': rt_content['poster'],
+                'rt_url': rt_content['rt_url']
             }
             csv_writer.writerow(csv_row_contents)
 
@@ -108,9 +110,12 @@ def read_rt_year_suffix(rt_url):
         rt_soup = BeautifulSoup(rt_html, "html.parser")
         critic_score = select_html('.critic-score .meter-value span', rt_soup)
         user_score = select_html('.audience-score .meter-value span', rt_soup)
+        poster = rt_soup.find_all('img', {'class': 'posterImage'})[0]
         response = {
             'critic_score': inner_html(critic_score),
             'user_score': inner_html(user_score),
+            'poster': poster['src'],
+            'rt_url': rt_url
         }
         return response
 
@@ -132,9 +137,12 @@ def read_rt_content(rt_url, title, year):
                                            rt_soup)
                 user_score = select_html('.audience-score .meter-value span',
                                          rt_soup)
+                poster = rt_soup.find_all('img', {'class': 'posterImage'})[0]
                 response = {
                     'critic_score': inner_html(critic_score),
                     'user_score': inner_html(user_score),
+                    'poster': poster['src'],
+                    'rt_url': rt_url
                 }
                 return response
     except urllib.error.HTTPError:
@@ -145,6 +153,8 @@ def read_rt_content(rt_url, title, year):
             return {
                 'critic_score': '',
                 'user_score': '',
+                'poster': '',
+                'rt_url': ''
             }
 
 
@@ -156,7 +166,9 @@ def main():
             'year',
             'country',
             'critic_score',
-            'user_score'
+            'user_score',
+            'poster',
+            'rt_url'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
