@@ -80,7 +80,7 @@ def read_wiki_list_table(url, csv_writer):
     with urllib.request.urlopen(url) as wiki_list_response:
         wiki_list_html = wiki_list_response.read()
         wiki_list_soup = BeautifulSoup(wiki_list_html, "html.parser")
-        table = wiki_list_soup.find_all('table')[1]
+        table = select_html('table.wikitable', wiki_list_soup)
         movie_rows = table.find_all('tr')[1:]
         for movie_row in movie_rows:
             title = get_cell_value(movie_row.select('th')[0])
