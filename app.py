@@ -59,7 +59,7 @@ def name_with_year_to_rt_url(name, year):
     return url + '_' + str(year)
 
 
-def url_from_api_response(name, year):
+def rt_url_from_api_response(name, year):
     api = 'https://www.rottentomatoes.com/api/private/v1.0/search/'
     query_params = '?catCount=10&q=' + convert_name(name).replace('_', '+')
     api_url = api + query_params
@@ -72,6 +72,21 @@ def url_from_api_response(name, year):
             return ''
     except urllib.error.HTTPError:
         return ''
+
+
+def imdb_url_from_api_response(name, year):
+    api = 'https://v2.sg.media-imdb.com/suggests/'
+    suffix = str(name[0]).lower() + '/' + convert_name(name) + '.json'
+    api_url = api + suffix
+    try:
+        with urllib.request.urlopen(api_url) as api_response:
+            content = re.search('{(?s).*}', api_response.read().decode('iso-8859-15')).group()
+            data = json.loads(content)
+            for movie in data['d']:
+                if str(movie.get('y', '')) == str(year):
+                    return 'http://www.imdb.com/title/' + movie['id']
+    except urllib.error.HTTPError:
+        return 'http error...'
 
 
 def read_wiki_list_table(url, csv_writer):
@@ -146,7 +161,7 @@ def read_rt_content(rt_url, title, year):
                 }
                 return response
     except urllib.error.HTTPError:
-        url_from_api = url_from_api_response(title, year)
+        url_from_api = rt_url_from_api_response(title, year)
         if len(url_from_api) > 0 and url_from_api != rt_url:
             return read_rt_content(url_from_api, title, year)
         else:
@@ -183,7 +198,6 @@ def main():
                 for a_tag in a_tags:
                     list_page = 'https://en.wikipedia.org' + a_tag['href']
                     read_wiki_list_table(list_page, writer)
-
 
 if __name__ == "__main__":
     main()
