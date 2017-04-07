@@ -80,13 +80,24 @@ def imdb_url_from_api_response(name, year):
     api_url = api + suffix
     try:
         with urllib.request.urlopen(api_url) as api_response:
-            content = re.search('{(?s).*}', api_response.read().decode('iso-8859-15')).group()
+            content = re.search(
+                '{(?s).*}',
+                api_response.read().decode('iso-8859-15')
+            ).group()
             data = json.loads(content)
             for movie in data['d']:
                 if str(movie.get('y', '')) == str(year):
                     return 'http://www.imdb.com/title/' + movie['id']
     except urllib.error.HTTPError:
         return 'http error...'
+
+
+def get_imdb_rating(url):
+    with urllib.request.urlopen(url) as imdb_page_response:
+        imdb_page_html = imdb_page_response.read()
+        imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
+        rating = select_html('[itemprop="ratingValue"]', imdb_page_soup)
+        return inner_html(rating)
 
 
 def read_wiki_list_table(url, csv_writer):
@@ -198,6 +209,7 @@ def main():
                 for a_tag in a_tags:
                     list_page = 'https://en.wikipedia.org' + a_tag['href']
                     read_wiki_list_table(list_page, writer)
+
 
 if __name__ == "__main__":
     main()
