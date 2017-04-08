@@ -5,6 +5,37 @@ import json
 from bs4 import BeautifulSoup
 
 list_of_horror_films = 'https://en.wikipedia.org/wiki/Lists_of_horror_films'
+categories = [
+    'found footage',
+    'demon',
+    'possession',
+    'exorcism',
+    'haunting',
+    'slasher',
+    'zombie',
+    'infection',
+    'vampire',
+    'clown',
+    'puppet',
+    'ghost',
+    'home invasion',
+    'alien',
+    'alien abduction',
+    'gore',
+    'werewolf',
+    'haunted house',
+    'shark',
+    'witchcraft',
+    'monster',
+    'doll',
+    'devil',
+    'graveyard',
+    'satanism',
+    'isolation',
+    'hotel',
+    'based on novel',
+    'snake'
+]
 
 
 def convert_name(name):
@@ -98,6 +129,18 @@ def get_imdb_rating(url):
         imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
         rating = select_html('[itemprop="ratingValue"]', imdb_page_soup)
         return inner_html(rating)
+
+
+def get_imdb_plot_keywords(url):
+    with urllib.request.urlopen(url) as imdb_plot_keywords_response:
+        imdb_page_html = imdb_plot_keywords_response.read()
+        imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
+        all_links = imdb_page_soup.select('.sodatext a')
+        all_keywords = []
+        for link in all_links:
+            if(inner_html(link) in categories):
+                all_keywords.append(inner_html(link))
+        return all_keywords
 
 
 def read_wiki_list_table(url, csv_writer):
@@ -209,6 +252,7 @@ def main():
                 for a_tag in a_tags:
                     list_page = 'https://en.wikipedia.org' + a_tag['href']
                     read_wiki_list_table(list_page, writer)
+    url = 'http://www.imdb.com/title/tt1591095/keywords'
 
 
 if __name__ == "__main__":
