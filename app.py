@@ -125,23 +125,29 @@ def get_imdb_id(name, year):
 
 
 def get_imdb_rating(url):
-    with urllib.request.urlopen(url) as imdb_page_response:
-        imdb_page_html = imdb_page_response.read()
-        imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
-        rating = select_html('[itemprop="ratingValue"]', imdb_page_soup)
-        return inner_html(rating)
+    try:
+        with urllib.request.urlopen(url) as imdb_page_response:
+            imdb_page_html = imdb_page_response.read()
+            imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
+            rating = select_html('[itemprop="ratingValue"]', imdb_page_soup)
+            return inner_html(rating)
+    except urllib.error.HTTPError:
+        return ''
 
 
 def get_imdb_plot_keywords(url):
-    with urllib.request.urlopen(url) as imdb_plot_keywords_response:
-        imdb_page_html = imdb_plot_keywords_response.read()
-        imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
-        all_links = imdb_page_soup.select('.sodatext a')
-        all_keywords = []
-        for link in all_links:
-            if(inner_html(link) in categories):
-                all_keywords.append(inner_html(link))
-        return all_keywords
+    try:
+        with urllib.request.urlopen(url) as imdb_plot_keywords_response:
+            imdb_page_html = imdb_plot_keywords_response.read()
+            imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
+            all_links = imdb_page_soup.select('.sodatext a')
+            all_keywords = []
+            for link in all_links:
+                if(inner_html(link) in categories):
+                    all_keywords.append(inner_html(link))
+            return all_keywords
+    except urllib.error.HTTPError:
+        return []
 
 
 def get_imdb_info(name, year):
@@ -172,6 +178,7 @@ def read_wiki_list_table(url, csv_writer):
             country = read_country_flags(movie_row)
             rt_url = name_to_rt_url(title)
             rt_content = read_rt_content(rt_url, title, year)
+            imdb_content = get_imdb_info(title, year)
             csv_row_contents = {
                 'title': title,
                 'director': director,
@@ -180,7 +187,9 @@ def read_wiki_list_table(url, csv_writer):
                 'critic_score': rt_content['critic_score'],
                 'user_score': rt_content['user_score'],
                 'poster': rt_content['poster'],
-                'rt_url': rt_content['rt_url']
+                'rt_url': rt_content['rt_url'],
+                'imdb_rating': imdb_content['imdb_rating'],
+                'imdb_keywords': imdb_content['imdb_keywords']
             }
             csv_writer.writerow(csv_row_contents)
 
@@ -250,7 +259,9 @@ def main():
             'critic_score',
             'user_score',
             'poster',
-            'rt_url'
+            'rt_url',
+            'imdb_rating',
+            'imdb_keywords'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
