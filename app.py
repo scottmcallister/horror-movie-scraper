@@ -152,7 +152,7 @@ def get_imdb_info(name, year):
     plot_keywords = get_imdb_plot_keywords(keywords_url)
     return {
         'imdb_rating': rating,
-        'imdb_keywords': plot_keywords
+        'imdb_keywords': "::".join(plot_keywords)
     }
 
 
@@ -265,7 +265,6 @@ def main():
                 for a_tag in a_tags:
                     list_page = 'https://en.wikipedia.org' + a_tag['href']
                     read_wiki_list_table(list_page, writer)
-    url = 'http://www.imdb.com/title/tt1591095/keywords'
 
 
 if __name__ == "__main__":
