@@ -34,7 +34,8 @@ categories = [
     'isolation',
     'hotel',
     'based on novel',
-    'snake'
+    'snake',
+    'paranormal'
 ]
 
 
@@ -105,7 +106,7 @@ def rt_url_from_api_response(name, year):
         return ''
 
 
-def imdb_url_from_api_response(name, year):
+def get_imdb_id(name, year):
     api = 'https://v2.sg.media-imdb.com/suggests/'
     suffix = str(name[0]).lower() + '/' + convert_name(name) + '.json'
     api_url = api + suffix
@@ -118,7 +119,7 @@ def imdb_url_from_api_response(name, year):
             data = json.loads(content)
             for movie in data['d']:
                 if str(movie.get('y', '')) == str(year):
-                    return 'http://www.imdb.com/title/' + movie['id']
+                    return movie['id']
     except urllib.error.HTTPError:
         return 'http error...'
 
@@ -141,6 +142,18 @@ def get_imdb_plot_keywords(url):
             if(inner_html(link) in categories):
                 all_keywords.append(inner_html(link))
         return all_keywords
+
+
+def get_imdb_info(name, year):
+    imdb_id = get_imdb_id(name, year)
+    rating_url = 'http://imdb.com/title/' + imdb_id
+    rating = get_imdb_rating(rating_url)
+    keywords_url = 'http://imdb.com/title/' + imdb_id + '/keywords'
+    plot_keywords = get_imdb_plot_keywords(keywords_url)
+    return {
+        'imdb_rating': rating,
+        'imdb_keywords': plot_keywords
+    }
 
 
 def read_wiki_list_table(url, csv_writer):
