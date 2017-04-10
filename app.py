@@ -110,6 +110,7 @@ def get_imdb_id(name, year):
     api = 'https://v2.sg.media-imdb.com/suggests/'
     suffix = str(name[0]).lower() + '/' + convert_name(name) + '.json'
     api_url = api + suffix
+    print(api_url)
     try:
         with urllib.request.urlopen(api_url) as api_response:
             content = re.search(
@@ -120,8 +121,10 @@ def get_imdb_id(name, year):
             for movie in data['d']:
                 if str(movie.get('y', '')) == str(year):
                     return movie['id']
-    except urllib.error.HTTPError:
-        return 'http error...'
+                else:
+                    return ''
+    except (urllib.error.HTTPError, ConnectionResetError, KeyError) as err:
+        return ''
 
 
 def get_imdb_rating(url):
@@ -131,7 +134,7 @@ def get_imdb_rating(url):
             imdb_page_soup = BeautifulSoup(imdb_page_html, "html.parser")
             rating = select_html('[itemprop="ratingValue"]', imdb_page_soup)
             return inner_html(rating)
-    except urllib.error.HTTPError:
+    except (urllib.error.HTTPError, ConnectionResetError) as err:
         return ''
 
 
@@ -146,7 +149,7 @@ def get_imdb_plot_keywords(url):
                 if(inner_html(link) in categories):
                     all_keywords.append(inner_html(link))
             return all_keywords
-    except urllib.error.HTTPError:
+    except (urllib.error.HTTPError, ConnectionResetError) as err:
         return []
 
 
@@ -236,7 +239,7 @@ def read_rt_content(rt_url, title, year):
                     'rt_url': rt_url
                 }
                 return response
-    except urllib.error.HTTPError:
+    except (urllib.error.HTTPError, ConnectionResetError) as err:
         url_from_api = rt_url_from_api_response(title, year)
         if len(url_from_api) > 0 and url_from_api != rt_url:
             return read_rt_content(url_from_api, title, year)
